@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/25 14:58:34 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/25 16:31:22 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,46 @@
 # include <iostream>
 
 // ex00
-template<typename T>
-T adder(T a, T b) {
+int adder(int a, int b) {
 	while (b != 0) {
-		T sum = a ^ b;
-		T carry = (a & b) << 1;
+		int sum = a ^ b;
+		int carry = (a & b) << 1;
 		a = sum;
 		b = carry;
 	}
 
 	return (a);
+}
+
+// ex01
+// helper to change int sign (O(1) - constant time)
+int negate(int x) {
+    int all_ones = 0;
+    for (int i = 0; i < 32; ++i) {
+        all_ones = (all_ones << 1) | 1;
+    }
+    return adder(x ^ all_ones, 1);
+}
+
+int multiplier(int a, int b) {
+    if (a == 0 || b == 0) return 0;
+
+    int result = 0;
+    bool result_negative = (a < 0) ^ (b < 0);
+
+    if (a < 0) a = negate(a);
+    if (b < 0) b = negate(b);
+
+    while (b > 0) {
+        if (b & 1) {
+            result = adder(result, a);
+        }
+        a = a << 1;
+        b = b >> 1;
+    }
+
+    if (result_negative) result = negate(result);
+    return result;
 }
 
 #endif
