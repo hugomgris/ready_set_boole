@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/25 17:54:09 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/25 18:21:22 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 
 # include <iostream>
 # include <stack>
+# include <set>
+# include <vector>
+# include <algorithm>
 # include <exception>
 # include <stdexcept>
 
@@ -127,5 +130,42 @@ bool eval_formula(const std::string &expression) {
 }
 
 // ex04
+void print_truth_table(const std::string &expression) {
+	std::set<char> variables;
+
+	for (const char c : expression) {
+		if (c >= 'A' && c <= 'Z') {
+			variables.insert(c);
+		} else if (c == '1' || c == '0') {
+			throw std::invalid_argument("Error: invalid expression for truth table: only A-Z characters and valid operators admitted");
+		}
+	}
+
+	std::vector<char> vars(variables.begin(), variables.end());
+	int n = vars.size();
+
+	for (char var : vars) {
+		std::cout << var << " | ";
+	}
+		std::cout << "Result" << std::endl;
+
+		for (int i = 0; i < (1 << n); ++i) {
+		std::string sub = expression;
+		std::vector<bool> values(n);
+		
+		for (int j = 0; j < n; ++j) {
+			values[j] = (i >> (n - 1 - j)) & 1;
+			char value = values[j] ? '1' : '0';
+			std::replace(sub.begin(), sub.end(), vars[j], value);
+		}
+		
+		bool result = eval_formula(sub);
+		
+		for (bool val : values) {
+			std::cout << (val ? 1 : 0) << " | ";
+		}
+		std::cout << (result ? 1 : 0) << std::endl;
+	}
+}
 
 #endif
