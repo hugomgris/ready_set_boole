@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/25 16:31:22 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/25 17:03:02 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,12 @@ int adder(int a, int b) {
 
 // ex01
 // helper to change int sign (O(1) - constant time)
-int negate(int x) {
+int negate(int n) {
     int all_ones = 0;
     for (int i = 0; i < 32; ++i) {
         all_ones = (all_ones << 1) | 1;
     }
-    return adder(x ^ all_ones, 1);
+    return adder(n ^ all_ones, 1);
 }
 
 int multiplier(int a, int b) {
@@ -56,6 +56,11 @@ int multiplier(int a, int b) {
 
     if (result_negative) result = negate(result);
     return result;
+}
+
+// ex02
+int gray_code(int n) {
+	return n ^ (n >> 1);
 }
 
 #endif
