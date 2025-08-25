@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/25 17:03:02 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/25 17:54:09 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 # define BOOLEAN_ALGEBRA
 
 # include <iostream>
+# include <stack>
+# include <exception>
+# include <stdexcept>
 
 // ex00
 int adder(int a, int b) {
@@ -62,5 +65,67 @@ int multiplier(int a, int b) {
 int gray_code(int n) {
 	return n ^ (n >> 1);
 }
+
+//ex03
+bool process_operand(bool a, bool b, char operand) {
+    if (operand == '!') {
+        return !b;
+    } else if (operand == '&') {
+		return (a && b);
+	} else if (operand == '|') {
+		return (a || b);
+	} else if (operand == '^') {
+		return (a ^ b);
+	} else if (operand == '>') {
+		return (!a || b);
+	} else if (operand == '=') {
+		return (a == b);
+	} else return (false); // will never reach this point
+}
+
+bool check_operand(const char c) {
+	char operands[] = {'!', '&', '|', '^', '>', '='};
+
+	for (const char o : operands) {
+		if (c == o) { return (true); }
+	}
+
+	return (false);
+}
+
+bool eval_formula(const std::string &expression) {
+    std::stack<bool> data;
+    
+    for (char c : expression) {
+        if (c == '0' || c == '1') {
+            data.push(c == '1');
+        } else if (c == '!') {
+            if (data.empty()) {
+                throw std::invalid_argument("Error: Invalid RPN expression: not enough operands");
+            }
+            bool operand = data.top(); 
+            data.pop();
+            data.push(!operand);
+        } else if (check_operand(c)) {
+            if (data.size() < 2) {
+                throw std::invalid_argument("Error: Invalid RPN expression: not enough operands");
+            }
+            bool b = data.top(); data.pop();
+            bool a = data.top(); data.pop();
+            bool result = process_operand(a, b, c);
+            data.push(result);
+        } else {
+            throw std::invalid_argument("Error: Invalid RPN expression: bad operand");
+        }
+    }
+
+    if (data.size() != 1) {
+        throw std::invalid_argument("Error: Invalid RPN expression: bad construction");
+    }
+    
+    return data.top();
+}
+
+// ex04
 
 #endif
