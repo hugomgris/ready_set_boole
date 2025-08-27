@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/25 18:21:22 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/27 17:59:40 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <algorithm>
 # include <exception>
 # include <stdexcept>
+# include <memory>
 
 // ex00
 int adder(int a, int b) {
@@ -166,6 +167,254 @@ void print_truth_table(const std::string &expression) {
 		}
 		std::cout << (result ? 1 : 0) << std::endl;
 	}
+}
+
+// ex05
+struct NNFNode {
+    enum Type { VARIABLE, AND, OR, NOT, XOR, IMPLIES, EQUIV };
+    Type type;
+    char variable;
+    std::unique_ptr<NNFNode> left;
+    std::unique_ptr<NNFNode> right;
+    
+    NNFNode(char var) : type(VARIABLE), variable(var) {}
+    NNFNode(Type op) : type(op) {}
+};
+
+std::unique_ptr<NNFNode> push_negation_down(std::unique_ptr<NNFNode> not_node);
+
+std::unique_ptr<NNFNode> convert_to_nnf(std::unique_ptr<NNFNode> ast) {
+    if (!ast) return ast;
+    
+    // Base case: variables are already in NNF
+    if (ast->type == NNFNode::VARIABLE) {
+        return ast;
+    }
+    
+    // Handle NOT operator (the complex case)
+    if (ast->type == NNFNode::NOT) {
+        return push_negation_down(std::move(ast));
+    }
+    
+    // For AND and OR: recursively convert children
+    if (ast->type == NNFNode::AND || ast->type == NNFNode::OR) {
+        ast->left = convert_to_nnf(std::move(ast->left));
+        ast->right = convert_to_nnf(std::move(ast->right));
+        return ast;
+    }
+    
+    // Should not reach here if eliminate_complex_operators worked correctly
+    throw std::invalid_argument("Unexpected operator in NNF conversion");
+}
+
+std::unique_ptr<NNFNode> push_negation_down(std::unique_ptr<NNFNode> not_node) {
+    auto inner = std::move(not_node->right);
+    
+    if (inner->type == NNFNode::NOT) {
+        // Double negation: !!A -> A
+        return convert_to_nnf(std::move(inner->right));
+    }
+    
+    if (inner->type == NNFNode::VARIABLE) {
+        // Variable negation: !A -> !A (already NNF)
+        not_node->right = std::move(inner);
+        return not_node;
+    }
+    
+    if (inner->type == NNFNode::AND) {
+        // De Morgan: !(A & B) -> !A | !B
+        auto left_neg = std::make_unique<NNFNode>(NNFNode::NOT);
+        left_neg->right = std::move(inner->left);
+        
+        auto right_neg = std::make_unique<NNFNode>(NNFNode::NOT);
+        right_neg->right = std::move(inner->right);
+        
+        auto or_node = std::make_unique<NNFNode>(NNFNode::OR);
+        or_node->left = convert_to_nnf(std::move(left_neg));
+        or_node->right = convert_to_nnf(std::move(right_neg));
+        
+        return or_node;
+    }
+    
+    if (inner->type == NNFNode::OR) {
+        // De Morgan: !(A | B) -> !A & !B
+        auto left_neg = std::make_unique<NNFNode>(NNFNode::NOT);
+        left_neg->right = std::move(inner->left);
+        
+        auto right_neg = std::make_unique<NNFNode>(NNFNode::NOT);
+        right_neg->right = std::move(inner->right);
+        
+        auto and_node = std::make_unique<NNFNode>(NNFNode::AND);
+        and_node->left = convert_to_nnf(std::move(left_neg));
+        and_node->right = convert_to_nnf(std::move(right_neg));
+        
+        return and_node;
+    }
+    
+    throw std::invalid_argument("Unexpected node type in negation");
+}
+
+std::unique_ptr<NNFNode> clone_node(const NNFNode* node) {
+	if (!node) return nullptr;
+	
+	if (node->type == NNFNode::VARIABLE) {
+		return std::make_unique<NNFNode>(node->variable);
+	}
+	
+	auto cloned = std::make_unique<NNFNode>(node->type);
+	if (node->left) cloned->left = clone_node(node->left.get());
+	if (node->right) cloned->right = clone_node(node->right.get());
+	
+	return cloned;
+}
+
+std::unique_ptr<NNFNode> eliminate_complex_operators(std::unique_ptr<NNFNode> ast) {
+	if (!ast) return ast;
+	if (ast->type == NNFNode::VARIABLE) return ast;
+
+	// Recursively transform children FIRST
+	if (ast->left) {
+		ast->left = eliminate_complex_operators(std::move(ast->left));
+	}
+	if (ast->right) {
+		ast->right = eliminate_complex_operators(std::move(ast->right));
+	}
+
+	if (ast->type == NNFNode::IMPLIES) {
+		// A > B becomes !A | B
+		auto not_left = std::make_unique<NNFNode>(NNFNode::NOT);
+		not_left->right = std::move(ast->left);
+		
+		auto or_node = std::make_unique<NNFNode>(NNFNode::OR);
+		or_node->left = std::move(not_left);
+		or_node->right = std::move(ast->right);
+		
+		return or_node;
+	}
+
+	if (ast->type == NNFNode::EQUIV) {
+		// A = B becomes (A & B) | (!A & !B)
+		auto left_clone = clone_node(ast->left.get());
+		auto right_clone = clone_node(ast->right.get());
+		
+		auto not_left = std::make_unique<NNFNode>(NNFNode::NOT);
+		not_left->right = std::move(left_clone);
+		
+		auto not_right = std::make_unique<NNFNode>(NNFNode::NOT);
+		not_right->right = std::move(right_clone);
+		
+		// (A & B)
+		auto case1 = std::make_unique<NNFNode>(NNFNode::AND);
+		case1->left = std::move(ast->left);
+		case1->right = std::move(ast->right);
+		
+		// (!A & !B)
+		auto case2 = std::make_unique<NNFNode>(NNFNode::AND);
+		case2->left = std::move(not_left);
+		case2->right = std::move(not_right);
+		
+		// (A & B) | (!A & !B)
+		auto or_node = std::make_unique<NNFNode>(NNFNode::OR);
+		or_node->left = std::move(case1);
+		or_node->right = std::move(case2);
+		
+		return or_node;
+	}
+	
+	if (ast->type == NNFNode::XOR) {
+		// A ^ B becomes (A & !B) | (!A & B)
+		auto left_clone = clone_node(ast->left.get());
+		auto right_clone = clone_node(ast->right.get());
+		
+		auto not_left = std::make_unique<NNFNode>(NNFNode::NOT);
+		not_left->right = std::move(left_clone);
+		
+		auto not_right = std::make_unique<NNFNode>(NNFNode::NOT);
+		not_right->right = std::move(right_clone);
+		
+		// (A & !B)
+		auto case1 = std::make_unique<NNFNode>(NNFNode::AND);
+		case1->left = std::move(ast->left);
+		case1->right = std::move(not_right);
+		
+		// (!A & B)
+		auto case2 = std::make_unique<NNFNode>(NNFNode::AND);
+		case2->left = std::move(not_left);
+		case2->right = std::move(ast->right);
+		
+		// (A & !B) | (!A & B)
+		auto or_node = std::make_unique<NNFNode>(NNFNode::OR);
+		or_node->left = std::move(case1);
+		or_node->right = std::move(case2);
+		
+		return or_node;
+	}
+	
+	// AND, OR, NOT are already basic
+	return ast;
+}
+
+std::string ast_to_rpn(const NNFNode* node) {
+    if (!node) return "";
+    
+    if (node->type == NNFNode::VARIABLE) {
+        return std::string(1, node->variable);
+    }
+    
+    if (node->type == NNFNode::NOT) {
+        return ast_to_rpn(node->right.get()) + "!";
+    }
+    
+    // Binary operators (AND, OR)
+    std::string left_rpn = ast_to_rpn(node->left.get());
+    std::string right_rpn = ast_to_rpn(node->right.get());
+    
+    char op;
+    if (node->type == NNFNode::AND) op = '&';
+    else if (node->type == NNFNode::OR) op = '|';
+    else throw std::invalid_argument("Unexpected operator in RPN conversion");
+    
+    return left_rpn + right_rpn + op;
+}
+
+std::unique_ptr<NNFNode> parse_rpn_to_ast(const std::string &rpn) {
+	std::stack<std::unique_ptr<NNFNode>> stack;
+
+	for (char c : rpn) {
+		if (c >= 'A' && c <= 'Z') {
+			stack.push(std::make_unique<NNFNode>(c));
+		} else if (c == '!') {
+			 auto operand = std::move(stack.top()) ; stack.pop();
+			 auto node = std::make_unique<NNFNode>(NNFNode::NOT);
+			 node->right = std::move(operand);
+			 stack.push(std::move(node));
+		} else {
+			auto right = std::move(stack.top()); stack.pop();
+			auto left = std::move(stack.top()); stack.pop();
+
+			NNFNode::Type op_type;
+			if (c == '&') op_type = NNFNode::AND;
+			else if (c == '|') op_type = NNFNode::OR;
+			else if (c == '^') op_type = NNFNode::XOR;
+			else if (c == '>') op_type = NNFNode::IMPLIES;
+			else if (c == '=') op_type = NNFNode::EQUIV;
+			else throw std::invalid_argument("Error: Unknown operator");
+
+			auto node = std::make_unique<NNFNode>(op_type);
+			node->left = std::move(left);
+			node->right = std::move(right);
+			stack.push(std::move(node));
+		}
+	}
+
+	return (std::move(stack.top()));
+}
+
+std::string negation_normal_form(const std::string &rpn) {
+	auto ast = parse_rpn_to_ast(rpn);
+	ast = eliminate_complex_operators(std::move(ast));
+	ast = convert_to_nnf(std::move(ast));
+	return (ast_to_rpn(ast.get()));
 }
 
 #endif
