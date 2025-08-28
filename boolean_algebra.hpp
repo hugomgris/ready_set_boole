@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/27 17:59:40 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/28 12:07:25 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -415,6 +415,128 @@ std::string negation_normal_form(const std::string &rpn) {
 	ast = eliminate_complex_operators(std::move(ast));
 	ast = convert_to_nnf(std::move(ast));
 	return (ast_to_rpn(ast.get()));
+}
+
+// ex06
+std::unique_ptr<NNFNode> distribute_or_over_and(std::unique_ptr<NNFNode> left, std::unique_ptr<NNFNode> right) {
+    // Handle cases where one side is already a single literal or variable
+    if (left->type != NNFNode::AND && right->type != NNFNode::AND) {
+        // Both are literals, just create OR
+        auto or_node = std::make_unique<NNFNode>(NNFNode::OR);
+        or_node->left = std::move(left);
+        or_node->right = std::move(right);
+        return or_node;
+    }
+    
+    // If left is AND: (A & B) | C becomes (A | C) & (B | C)
+    if (left->type == NNFNode::AND && right->type != NNFNode::AND) {
+        auto right_clone = clone_node(right.get());
+        
+        auto or1 = distribute_or_over_and(std::move(left->left), std::move(right));
+        auto or2 = distribute_or_over_and(std::move(left->right), std::move(right_clone));
+        
+        auto and_node = std::make_unique<NNFNode>(NNFNode::AND);
+        and_node->left = std::move(or1);
+        and_node->right = std::move(or2);
+        
+        return and_node;
+    }
+    
+    // If right is AND: A | (B & C) becomes (A | B) & (A | C)
+    if (right->type == NNFNode::AND && left->type != NNFNode::AND) {
+        auto left_clone = clone_node(left.get());
+        
+        auto or1 = distribute_or_over_and(std::move(left), std::move(right->left));
+        auto or2 = distribute_or_over_and(std::move(left_clone), std::move(right->right));
+        
+        auto and_node = std::make_unique<NNFNode>(NNFNode::AND);
+        and_node->left = std::move(or1);
+        and_node->right = std::move(or2);
+        
+        return and_node;
+    }
+    
+    // Both are AND: (A & B) | (C & D) becomes (A | C) & (A | D) & (B | C) & (B | D)
+    if (left->type == NNFNode::AND && right->type == NNFNode::AND) {
+        auto left_left_clone = clone_node(left->left.get());
+        auto left_right_clone = clone_node(left->right.get());
+        auto right_left_clone = clone_node(right->left.get());
+        auto right_right_clone = clone_node(right->right.get());
+        
+        // (A | C)
+        auto or1 = distribute_or_over_and(std::move(left->left), std::move(right->left));
+        
+        // (A | D)
+        auto or2 = distribute_or_over_and(std::move(left_left_clone), std::move(right->right));
+        
+        // (B | C)
+        auto or3 = distribute_or_over_and(std::move(left->right), std::move(right_left_clone));
+        
+        // (B | D)
+        auto or4 = distribute_or_over_and(std::move(left_right_clone), std::move(right_right_clone));
+        
+        // Build the AND chain: ((A|C) & (A|D)) & ((B|C) & (B|D))
+        auto and1 = std::make_unique<NNFNode>(NNFNode::AND);
+        and1->left = std::move(or1);
+        and1->right = std::move(or2);
+        
+        auto and2 = std::make_unique<NNFNode>(NNFNode::AND);
+        and2->left = std::move(or3);
+        and2->right = std::move(or4);
+        
+        auto final_and = std::make_unique<NNFNode>(NNFNode::AND);
+        final_and->left = std::move(and1);
+        final_and->right = std::move(and2);
+        
+        return final_and;
+    }
+    
+    // Should not reach here
+    auto or_node = std::make_unique<NNFNode>(NNFNode::OR);
+    or_node->left = std::move(left);
+    or_node->right = std::move(right);
+    return or_node;
+}
+
+std::unique_ptr<NNFNode> convert_to_cnf(std::unique_ptr<NNFNode> ast) {
+    if (!ast) return ast;
+    
+    // Base case: variables and negated variables are already in CNF
+    if (ast->type == NNFNode::VARIABLE || 
+        (ast->type == NNFNode::NOT && ast->right->type == NNFNode::VARIABLE)) {
+        return ast;
+    }
+    
+    // Recursively convert children to CNF first
+    if (ast->left) {
+        ast->left = convert_to_cnf(std::move(ast->left));
+    }
+    if (ast->right) {
+        ast->right = convert_to_cnf(std::move(ast->right));
+    }
+    
+    // Handle AND - already correct for CNF (conjunction at top level)
+    if (ast->type == NNFNode::AND) {
+        return ast;
+    }
+    
+    // Handle OR - need to distribute if children contain AND
+    if (ast->type == NNFNode::OR) {
+        return distribute_or_over_and(std::move(ast->left), std::move(ast->right));
+    }
+    
+    // Should not reach here if input is valid NNF
+    throw std::invalid_argument("Unexpected node type in CNF conversion");
+}
+
+std::string conjunctive_normal_form(const std::string &rpn) {
+    auto ast = parse_rpn_to_ast(rpn);
+    ast = eliminate_complex_operators(std::move(ast));
+    ast = convert_to_nnf(std::move(ast));
+    
+    ast = convert_to_cnf(std::move(ast));
+    
+    return ast_to_rpn(ast.get());
 }
 
 #endif
