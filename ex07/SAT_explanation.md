@@ -6,6 +6,8 @@
 
 **Boolean Satisfiability (SAT)** is the problem of determining whether there exists an assignment of truth values to variables that makes a boolean formula evaluate to true.
 
+**In human language:** ***The SAT is attempting to check every possible combination of values assignable to an expression's variables to find a TRUE outcome, and therefore it's used to check if a given expression has a possible true (1) solution.***
+
 **Formal Definition**:
 - **Input**: A boolean formula φ over variables x₁, x₂, ..., xₙ
 - **Output**: TRUE if there exists an assignment that makes φ = TRUE, FALSE otherwise
@@ -261,58 +263,3 @@ bool sat(const std::string &formula) {
 - Only return `false` after exhausting all possibilities
 
 ---
-
-## **Practical Applications**
-
-### **1. Circuit Verification**
-```cpp
-// Check if circuit implementation matches specification
-bool circuit_correct = !sat("spec_formula ^ impl_formula");
-```
-
-### **2. Software Bounded Model Checking**
-```cpp
-// Check if program can reach error state
-bool program_safe = !sat("path_condition & error_condition");
-```
-
-### **3. Cryptographic Analysis**
-```cpp
-// Try to find key that produces known plaintext/ciphertext pair
-bool key_found = sat("encryption_formula & known_io_constraints");
-```
-
-### **4. AI Planning**
-```cpp
-// Find action sequence that reaches goal
-bool plan_exists = sat("initial_state & actions & goal_state");
-```
-
----
-
-## **Optimization Opportunities**
-
-### **1. Early Pruning**
-- **Unit Propagation**: If formula contains single literal, set it true
-- **Pure Literal Elimination**: Variables appearing with one polarity
-
-### **2. Smart Variable Ordering**
-- **Most Constrained First**: Variables appearing in most clauses
-- **Activity-Based**: Variables involved in recent conflicts
-
-### **3. Clause Learning**
-- **CDCL**: Learn from conflicts to avoid revisiting similar states
-- **Backjumping**: Skip irrelevant decision levels
-
-### **4. Preprocessing**
-- **Subsumption**: Remove redundant clauses
-- **Resolution**: Eliminate variables through resolution
-
-### **Future Improvements**
-The current brute force implementation could be enhanced with:
-- DPLL algorithm with unit propagation
-- Non-chronological backtracking
-- Conflict-driven clause learning
-- Random restarts
-
-However, for the scope of this exercise, the exhaustive approach correctly solves the SAT problem for small to medium-sized formulas.
