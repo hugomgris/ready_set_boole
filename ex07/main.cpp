@@ -6,9 +6,11 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:30:50 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/28 12:31:30 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/28 14:45:18 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+// ex07 main
 
 #include "../boolean_algebra.hpp"
 
@@ -191,9 +193,6 @@ void test_performance() {
 //ex07 main
 int main() {
     try {
-        std::cout << "\033[0;32m🚀 COMPREHENSIVE SAT TESTING SUITE 🚀\033[0m" << std::endl;
-        std::cout << "========================================" << std::endl << std::endl;
-        
         test_basic_satisfiability();
         test_complex_operators();
         test_unsatisfiable_formulas();
@@ -206,7 +205,7 @@ int main() {
         std::cout << "\033[0;32m\033[0;32mOK\033[0m ALL TESTS COMPLETED!\033[0m" << std::endl;
         
     } catch (const std::exception &e) {
-        std::cout << "\033[0;31m\033[0;32mOK (Complex Pattern)\033[0mFATAL EXCEPTION: " << e.what() << "\033[0m" << std::endl;
+        std::cout << "\033[0;32mOK (Complex Pattern)\033[0mFATAL EXCEPTION: " << e.what() << "\033[0m" << std::endl;
         return 1;
     }
     

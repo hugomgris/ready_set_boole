@@ -6,21 +6,23 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/28 12:32:00 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/28 12:59:58 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef BOOLEAN_ALGEBRA
-# define BOOLEAN_ALGEBRA
+#ifndef BOOLEAN_ALGEBRA_HPP
+#define BOOLEAN_ALGEBRA_HPP
 
-# include <iostream>
-# include <stack>
-# include <set>
-# include <vector>
-# include <algorithm>
-# include <exception>
-# include <stdexcept>
-# include <memory>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stack>
+#include <memory>
+#include <cctype>
+#include <stdexcept>
+#include <algorithm>
+#include <set>
+#include <cstdint>
 
 // ex00
 int adder(int a, int b) {
@@ -581,6 +583,265 @@ bool sat(const std::string &formula) {
         std::cerr << "Error in SAT evaluation: " << e.what() << std::endl;
         return false;
     }
+}
+
+// ex08
+std::vector<std::vector<int>> powerset(const std::vector<int> &set) {
+    std::vector<std::vector<int>> result;
+    int n = set.size();
+    
+    // Generate all 2^n subsets using bit manipulation
+    for (int i = 0; i < (1 << n); ++i) {
+        std::vector<int> subset;
+        
+        // Check each bit position
+        for (int j = 0; j < n; ++j) {
+            // If bit j is set in i, include set[j] in the subset
+            if (i & (1 << j)) {
+                subset.push_back(set[j]);
+            }
+        }
+        
+        result.push_back(subset);
+    }
+    
+    return result;
+}
+
+// ex09
+std::vector<int> eval_set(const std::string &formula, const std::vector<std::vector<int>> &sets) {
+    std::stack<std::vector<int>> stack;
+    
+    for (char c : formula) {
+        if (c >= 'A' && c <= 'Z') {
+            // Variable: push corresponding set
+            int index = c - 'A';
+            if (index >= 0 && index < static_cast<int>(sets.size())) {
+                stack.push(sets[index]);
+            } else {
+                throw std::runtime_error("Variable index out of range");
+            }
+        } else if (c == '!') {
+            // Negation: complement of the set
+            if (stack.empty()) throw std::runtime_error("Invalid formula: negation without operand");
+            
+            auto set = stack.top();
+            stack.pop();
+            
+            // Complement: find all elements that are NOT in the set
+            // We need to determine the universe (all possible elements)
+            std::set<int> universe;
+            for (const auto &s : sets) {
+                for (int elem : s) {
+                    universe.insert(elem);
+                }
+            }
+            
+            std::vector<int> complement;
+            for (int elem : universe) {
+                if (std::find(set.begin(), set.end(), elem) == set.end()) {
+                    complement.push_back(elem);
+                }
+            }
+            
+            std::sort(complement.begin(), complement.end());
+            stack.push(complement);
+            
+        } else if (c == '&') {
+            // Conjunction: intersection of two sets
+            if (stack.size() < 2) throw std::runtime_error("Invalid formula: conjunction needs two operands");
+            
+            auto right = stack.top(); stack.pop();
+            auto left = stack.top(); stack.pop();
+            
+            std::vector<int> intersection;
+            for (int elem : left) {
+                if (std::find(right.begin(), right.end(), elem) != right.end()) {
+                    intersection.push_back(elem);
+                }
+            }
+            
+            std::sort(intersection.begin(), intersection.end());
+            stack.push(intersection);
+            
+        } else if (c == '|') {
+            // Disjunction: union of two sets
+            if (stack.size() < 2) throw std::runtime_error("Invalid formula: disjunction needs two operands");
+            
+            auto right = stack.top(); stack.pop();
+            auto left = stack.top(); stack.pop();
+            
+            std::set<int> union_set;
+            for (int elem : left) {
+                union_set.insert(elem);
+            }
+            for (int elem : right) {
+                union_set.insert(elem);
+            }
+            
+            std::vector<int> result(union_set.begin(), union_set.end());
+            stack.push(result);
+            
+        } else if (c == '^') {
+            // Exclusive or: symmetric difference of two sets
+            if (stack.size() < 2) throw std::runtime_error("Invalid formula: xor needs two operands");
+            
+            auto right = stack.top(); stack.pop();
+            auto left = stack.top(); stack.pop();
+            
+            std::vector<int> sym_diff;
+            
+            // Elements in left but not in right
+            for (int elem : left) {
+                if (std::find(right.begin(), right.end(), elem) == right.end()) {
+                    sym_diff.push_back(elem);
+                }
+            }
+            
+            // Elements in right but not in left
+            for (int elem : right) {
+                if (std::find(left.begin(), left.end(), elem) == left.end()) {
+                    sym_diff.push_back(elem);
+                }
+            }
+            
+            std::sort(sym_diff.begin(), sym_diff.end());
+            stack.push(sym_diff);
+            
+        } else if (c == '>') {
+            // Implication: !A | B = complement(A) ∪ B
+            if (stack.size() < 2) throw std::runtime_error("Invalid formula: implication needs two operands");
+            
+            auto right = stack.top(); stack.pop();
+            auto left = stack.top(); stack.pop();
+            
+            // Find universe for complement of left
+            std::set<int> universe;
+            for (const auto &s : sets) {
+                for (int elem : s) {
+                    universe.insert(elem);
+                }
+            }
+            
+            // Complement of left
+            std::vector<int> not_left;
+            for (int elem : universe) {
+                if (std::find(left.begin(), left.end(), elem) == left.end()) {
+                    not_left.push_back(elem);
+                }
+            }
+            
+            // Union of not_left and right
+            std::set<int> implication_set;
+            for (int elem : not_left) {
+                implication_set.insert(elem);
+            }
+            for (int elem : right) {
+                implication_set.insert(elem);
+            }
+            
+            std::vector<int> result(implication_set.begin(), implication_set.end());
+            stack.push(result);
+            
+        } else if (c == '=') {
+            // Equivalence: (A & B) | (!A & !B)
+            if (stack.size() < 2) throw std::runtime_error("Invalid formula: equivalence needs two operands");
+            
+            auto right = stack.top(); stack.pop();
+            auto left = stack.top(); stack.pop();
+            
+            // Find universe for complements
+            std::set<int> universe;
+            for (const auto &s : sets) {
+                for (int elem : s) {
+                    universe.insert(elem);
+                }
+            }
+            
+            // A & B (intersection)
+            std::vector<int> both;
+            for (int elem : left) {
+                if (std::find(right.begin(), right.end(), elem) != right.end()) {
+                    both.push_back(elem);
+                }
+            }
+            
+            // !A & !B (neither)
+            std::vector<int> neither;
+            for (int elem : universe) {
+                if (std::find(left.begin(), left.end(), elem) == left.end() &&
+                    std::find(right.begin(), right.end(), elem) == right.end()) {
+                    neither.push_back(elem);
+                }
+            }
+            
+            // Union of both and neither
+            std::set<int> equiv_set;
+            for (int elem : both) {
+                equiv_set.insert(elem);
+            }
+            for (int elem : neither) {
+                equiv_set.insert(elem);
+            }
+            
+            std::vector<int> result(equiv_set.begin(), equiv_set.end());
+            stack.push(result);
+        }
+    }
+    
+    if (stack.size() != 1) {
+        throw std::runtime_error("Invalid formula: incorrect number of operands");
+    }
+    
+    return stack.top();
+}
+
+// ex10
+double map(uint16_t x, uint16_t y) {
+    // Combine x and y into a single 32-bit value using bit interleaving (Z-order curve)
+    uint32_t combined = 0;
+    
+    // Interleave the bits of x and y
+    for (int i = 0; i < 16; ++i) {
+        // Extract bit i from x and y
+        uint32_t bit_x = (x >> i) & 1;
+        uint32_t bit_y = (y >> i) & 1;
+        
+        // Place bit_x at position 2*i and bit_y at position 2*i+1
+        combined |= (bit_x << (2 * i));
+        combined |= (bit_y << (2 * i + 1));
+    }
+    
+    // Convert to a value in [0, 1]
+    // Since we use 32 bits, the maximum value is 2^32 - 1
+    double result = static_cast<double>(combined) / static_cast<double>(0xFFFFFFFFUL);
+    
+    return result;
+}
+
+// ex11
+std::pair<uint16_t, uint16_t> reverse_map(double n) {
+    // Clamp n to [0, 1] range
+    if (n < 0.0) n = 0.0;
+    if (n > 1.0) n = 1.0;
+    
+    // Convert back to 32-bit integer
+    uint32_t combined = static_cast<uint32_t>(n * 0xFFFFFFFFUL);
+    
+    // De-interleave the bits to get x and y coordinates
+    uint16_t x = 0, y = 0;
+    
+    for (int i = 0; i < 16; ++i) {
+        // Extract bits at positions 2*i (for x) and 2*i+1 (for y)
+        uint32_t bit_x = (combined >> (2 * i)) & 1;
+        uint32_t bit_y = (combined >> (2 * i + 1)) & 1;
+        
+        // Place the bits in the correct positions for x and y
+        x |= (bit_x << i);
+        y |= (bit_y << i);
+    }
+    
+    return std::make_pair(x, y);
 }
 
 #endif

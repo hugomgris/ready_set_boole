@@ -6,7 +6,7 @@
 #    By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/13 13:48:05 by hmunoz-g          #+#    #+#              #
-#    Updated: 2025/08/20 15:31:27 by hmunoz-g         ###   ########.fr        #
+#    Updated: 2025/08/28 16:39:13 by hmunoz-g         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -60,7 +60,7 @@ $(NAME): $(OBJS) Makefile
 	@echo "$(GREEN)Linking $(NAME)!$(DEF_COLOR)"
 	$(CPP) $(FLAGS) $(OBJS) -o $(NAME)
 	@echo "$(GREEN)$(NAME) compiled!$(DEF_COLOR)"
-	@echo "$(RED)Beginning to believe$(DEF_COLOR)"
+	@echo "$(RED)Zen in the art of absolutes$(DEF_COLOR)"
 
 clean:
 	@$(RM) $(OBJ_DIR) $(DEP_DIR)

@@ -6,11 +6,11 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:30:50 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/28 12:29:47 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/28 14:42:55 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//ex06 main
+// ex06 main
 
 #include "../boolean_algebra.hpp"
 
