@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/28 12:07:25 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/28 12:32:00 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -537,6 +537,50 @@ std::string conjunctive_normal_form(const std::string &rpn) {
     ast = convert_to_cnf(std::move(ast));
     
     return ast_to_rpn(ast.get());
+}
+
+// ex07
+bool sat(const std::string &formula) {
+    try {
+        // Extract all variables from the formula
+        std::set<char> variables;
+        for (char c : formula) {
+            if (c >= 'A' && c <= 'Z') {
+                variables.insert(c);
+            }
+        }
+        
+        std::vector<char> vars(variables.begin(), variables.end());
+        int n = vars.size();
+        
+        // Try all possible combinations of truth values
+        for (int i = 0; i < (1 << n); ++i) {
+            std::string test_formula = formula;
+            
+            // Substitute variables with truth values for this combination
+            for (int j = 0; j < n; ++j) {
+                bool value = (i >> (n - 1 - j)) & 1;
+                char truth_value = value ? '1' : '0';
+                std::replace(test_formula.begin(), test_formula.end(), vars[j], truth_value);
+            }
+            
+            // Evaluate the formula with this assignment
+            bool result = eval_formula(test_formula);
+            
+            // If any combination evaluates to true, the formula is satisfiable
+            if (result) {
+                return true;
+            }
+        }
+        
+        // No combination made the formula true
+        return false;
+        
+    } catch (const std::exception &e) {
+        // Invalid formula
+        std::cerr << "Error in SAT evaluation: " << e.what() << std::endl;
+        return false;
+    }
 }
 
 #endif

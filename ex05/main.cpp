@@ -6,9 +6,11 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:30:50 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/27 18:03:04 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/28 12:30:01 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+//ex05 main
 
 #include "../boolean_algebra.hpp"
 
@@ -113,7 +115,7 @@ void verify_nnf_property(const std::string& original, const std::string& nnf) {
         if (nnf[i] == '!') {
             // Check if the negation is followed by a variable
             if (i == 0 || (nnf[i-1] < 'A' || nnf[i-1] > 'Z')) {
-                std::cout << "❌ INVALID NNF: " << original << " -> " << nnf 
+                std::cout << "INVALID NNF: " << original << " -> " << nnf 
                          << " (negation not on variable)" << std::endl;
                 return;
             }
@@ -121,7 +123,7 @@ void verify_nnf_property(const std::string& original, const std::string& nnf) {
         
         // Check for forbidden operators in output
         if (nnf[i] == '^' || nnf[i] == '>' || nnf[i] == '=') {
-            std::cout << "❌ INVALID NNF: " << original << " -> " << nnf 
+            std::cout << "INVALID NNF: " << original << " -> " << nnf 
                      << " (contains forbidden operator: " << nnf[i] << ")" << std::endl;
             return;
         }
@@ -149,7 +151,7 @@ void test_nnf_validity() {
             std::string result = negation_normal_form(test);
             verify_nnf_property(test, result);
         } catch (const std::exception& e) {
-            std::cout << "❌ EXCEPTION: " << test << " -> " << e.what() << std::endl;
+            std::cout << "EXCEPTION: " << test << " -> " << e.what() << std::endl;
         }
     }
     
@@ -173,7 +175,7 @@ int main() {
         std::cout << "\033[0;32m✅ ALL TESTS COMPLETED!\033[0m" << std::endl;
         
     } catch (const std::exception &e) {
-        std::cout << "\033[0;31m❌ FATAL EXCEPTION: " << e.what() << "\033[0m" << std::endl;
+        std::cout << "\033[0;31mFATAL EXCEPTION: " << e.what() << "\033[0m" << std::endl;
         return 1;
     }
     
