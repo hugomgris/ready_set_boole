@@ -29,11 +29,11 @@ void test_corner_points() {
         double result = map(corners[i].first, corners[i].second);
         std::cout << names[i] << " → " << std::fixed << std::setprecision(10) << result << std::endl;
         
-        // Result should be in [0, 1]
+        // Result should be in [0, 1]\033[0m
         assert(result >= 0.0 && result <= 1.0);
     }
     
-    std::cout << "✓ All corner points map to [0, 1]" << std::endl;
+    std::cout << "\033[0;32m✓ All corner points map to [0, 1]\033[0m" << std::endl;
 }
 
 void test_range_properties() {
@@ -57,7 +57,7 @@ void test_range_properties() {
     std::cout << "Tested " << test_points << " random points" << std::endl;
     std::cout << "Min value: " << std::fixed << std::setprecision(10) << min_val << std::endl;
     std::cout << "Max value: " << std::fixed << std::setprecision(10) << max_val << std::endl;
-    std::cout << "✓ All values in range [0, 1]" << std::endl;
+    std::cout << "\033[0;32m✓ All values in range [0, 1]\033[0m" << std::endl;
 }
 
 void test_bit_interleaving() {
@@ -88,10 +88,10 @@ void test_bit_interleaving() {
         // Verify the mapping is deterministic
         double result2 = map(test.x, test.y);
         assert(result == result2);
-        std::cout << " ✓" << std::endl;
+        std::cout << " \033[0;32m✓" << std::endl;
     }
     
-    std::cout << "✓ Bit interleaving works correctly" << std::endl;
+    std::cout << "\033[0;32m✓ Bit interleaving works correctly\033[0m" << std::endl;
 }
 
 void test_injectivity() {
@@ -118,7 +118,7 @@ void test_injectivity() {
     auto unique_end = std::unique(results.begin(), results.end());
     
     assert(unique_end == results.end());
-    std::cout << "✓ All test points map to unique values (bijective)" << std::endl;
+    std::cout << "\033[0;32m✓ All test points map to unique values (bijective)\033[0m" << std::endl;
 }
 
 void test_space_filling_properties() {
@@ -145,17 +145,11 @@ void test_space_filling_properties() {
         std::cout << std::endl;
     }
     
-    std::cout << "✓ Space-filling curve properties demonstrated" << std::endl;
+    std::cout << "\033[0;32m✓ Space-filling curve properties demonstrated\033[0m" << std::endl;
 }
 
 void demonstrate_z_order_curve() {
-    std::cout << "\n\033[0;33mZ-Order Curve Demonstration----------------------\033[0m" << std::endl;
-    
-    std::cout << "The Z-order curve (Morton curve) interleaves the bits of x and y coordinates." << std::endl;
-    std::cout << "This creates a space-filling curve that maps 2D points to 1D values." << std::endl;
-    std::cout << std::endl;
-    
-    std::cout << "Example bit interleaving for small values:" << std::endl;
+    std::cout << "\n\033[0;33mExample bit interleaving for small values:----------------------\033[0m" << std::endl;
     
     for (uint16_t x = 0; x < 4; ++x) {
         for (uint16_t y = 0; y < 4; ++y) {
@@ -176,10 +170,6 @@ void demonstrate_z_order_curve() {
             std::cout << " → " << std::fixed << std::setprecision(8) << result << std::endl;
         }
     }
-    
-    std::cout << std::endl;
-    std::cout << "The Z-order curve gets its name from the Z-like pattern it traces" << std::endl;
-    std::cout << "through 2D space when connecting points in order of their 1D values." << std::endl;
 }
 
 void test_extreme_values() {
@@ -206,13 +196,10 @@ void test_extreme_values() {
         assert(result >= 0.0 && result <= 1.0);
     }
     
-    std::cout << "✓ Extreme values handled correctly" << std::endl;
+    std::cout << "\033[0;32m✓ Extreme values handled correctly\033[0m" << std::endl;
 }
 
 int main() {
-    std::cout << "Exercise 10: Space-Filling Curve Mapping (2D → 1D)" << std::endl;
-    std::cout << "===================================================" << std::endl;
-    
     try {
         test_corner_points();
         test_range_properties();
@@ -222,7 +209,7 @@ int main() {
         test_extreme_values();
         demonstrate_z_order_curve();
         
-        std::cout << "\nAll tests passed! Space-filling curve mapping is correct." << std::endl;
+        std::cout << "\n\033[0;32mAll tests passed! Space-filling curve mapping is correct.\033[0m" << std::endl;
         
     } catch (const std::exception &e) {
         std::cerr << "❌ Test failed: " << e.what() << std::endl;

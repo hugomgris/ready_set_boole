@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/28 14:42:31 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/28 14:45:30 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/29 08:59:05 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void test_powerset_basic() {
     std::cout << "Powerset of {} = ";
     print_powerset(result);
     assert(result.size() == 1 && result[0].empty());
-    std::cout << "✓ Empty set test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Empty set test passed\033[0m" << std::endl;
     
     // Test single element
     std::vector<int> single = {1};
@@ -50,7 +50,7 @@ void test_powerset_basic() {
     std::cout << "Powerset of {1} = ";
     print_powerset(result);
     assert(result.size() == 2);
-    std::cout << "✓ Single element test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Single element test passed\033[0m" << std::endl;
     
     // Test two elements
     std::vector<int> two = {1, 2};
@@ -58,7 +58,7 @@ void test_powerset_basic() {
     std::cout << "Powerset of {1, 2} = ";
     print_powerset(result);
     assert(result.size() == 4);
-    std::cout << "✓ Two elements test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Two elements test passed\033[0m" << std::endl;
 }
 
 void test_powerset_properties() {
@@ -78,7 +78,7 @@ void test_powerset_properties() {
                   << " (expected " << expected_size << ")" << std::endl;
         assert(result.size() == expected_size);
     }
-    std::cout << "✓ Cardinality property verified" << std::endl;
+    std::cout << "\n\033[0;32m✓ Cardinality property verified\033[0m" << std::endl;
 }
 
 void test_powerset_contains_all_subsets() {
@@ -96,7 +96,7 @@ void test_powerset_contains_all_subsets() {
         }
     }
     assert(has_empty);
-    std::cout << "✓ Contains empty set" << std::endl;
+    std::cout << "\033[0;32m✓ Contains empty set\033[0m" << std::endl;
     
     // Check that powerset contains the original set
     bool has_original = false;
@@ -116,7 +116,7 @@ void test_powerset_contains_all_subsets() {
         }
     }
     assert(has_original);
-    std::cout << "✓ Contains original set" << std::endl;
+    std::cout << "\033[0;32m✓ Contains original set\033[0m" << std::endl;
     
     // Check that all elements in subsets are from original set
     for (const auto &subset : result) {
@@ -124,7 +124,7 @@ void test_powerset_contains_all_subsets() {
             assert(std::find(set.begin(), set.end(), element) != set.end());
         }
     }
-    std::cout << "✓ All subset elements are from original set" << std::endl;
+    std::cout << "\033[0;32m✓ All subset elements are from original set\033[0m" << std::endl;
 }
 
 void test_powerset_duplicates() {
@@ -139,7 +139,7 @@ void test_powerset_duplicates() {
     
     // Should still generate 2^3 = 8 subsets
     assert(result.size() == 8);
-    std::cout << "✓ Handles duplicates by treating them as distinct positions" << std::endl;
+    std::cout << "\033[0;32m✓ Handles duplicates by treating them as distinct positions\033[0m" << std::endl;
 }
 
 void test_powerset_edge_cases() {
@@ -151,7 +151,7 @@ void test_powerset_edge_cases() {
     std::cout << "Powerset of {-1, 0, 1} = ";
     print_powerset(result);
     assert(result.size() == 8);
-    std::cout << "✓ Handles negative numbers" << std::endl;
+    std::cout << "\033[0;32m✓ Handles negative numbers\033[0m" << std::endl;
     
     // Test with large numbers
     std::vector<int> large = {100, 200};
@@ -159,7 +159,7 @@ void test_powerset_edge_cases() {
     std::cout << "Powerset of {100, 200} = ";
     print_powerset(result);
     assert(result.size() == 4);
-    std::cout << "✓ Handles large numbers" << std::endl;
+    std::cout << "\033[0;32m✓ Handles large numbers\033[0m" << std::endl;
 }
 
 void demonstrate_powerset_concept() {

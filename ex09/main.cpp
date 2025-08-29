@@ -50,7 +50,7 @@ void test_basic_operations() {
     
     std::vector<int> expected_union = {1, 2, 3};
     assert(sets_equal(result, expected_union));
-    std::cout << "✓ Union test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Union test passed\033[0m" << std::endl;
     
     // Test intersection (conjunction)
     result = eval_set("AB&", sets);
@@ -60,7 +60,7 @@ void test_basic_operations() {
     
     std::vector<int> expected_intersection = {2};
     assert(sets_equal(result, expected_intersection));
-    std::cout << "✓ Intersection test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Intersection test passed\033[0m" << std::endl;
     
     // Test symmetric difference (XOR)
     result = eval_set("AB^", sets);
@@ -70,7 +70,7 @@ void test_basic_operations() {
     
     std::vector<int> expected_xor = {1, 3};
     assert(sets_equal(result, expected_xor));
-    std::cout << "✓ Symmetric difference test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Symmetric difference test passed\033[0m" << std::endl;
 }
 
 void test_complement_operations() {
@@ -91,7 +91,7 @@ void test_complement_operations() {
     
     std::vector<int> expected_complement = {3, 4};
     assert(sets_equal(result, expected_complement));
-    std::cout << "✓ Complement test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Complement test passed\033[0m" << std::endl;
     
     // Test double complement (should return original)
     result = eval_set("A!!", sets);
@@ -101,7 +101,7 @@ void test_complement_operations() {
     
     std::vector<int> expected_double_complement = {1, 2};
     assert(sets_equal(result, expected_double_complement));
-    std::cout << "✓ Double complement test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Double complement test passed\033[0m" << std::endl;
 }
 
 void test_implication_operations() {
@@ -121,7 +121,7 @@ void test_implication_operations() {
     // A > B = !A | B = {2, 3} | {2, 3} = {2, 3}
     std::vector<int> expected_implication = {2, 3};
     assert(sets_equal(result, expected_implication));
-    std::cout << "✓ Implication test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Implication test passed\033[0m" << std::endl;
     
     // Test equivalence A = B (equivalent to (A & B) | (!A & !B))
     result = eval_set("AB=", sets);
@@ -132,7 +132,7 @@ void test_implication_operations() {
     // A = B: (A & B) | (!A & !B) = {} | {} = {}
     std::vector<int> expected_equivalence = {};
     assert(sets_equal(result, expected_equivalence));
-    std::cout << "✓ Equivalence test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Equivalence test passed\033[0m" << std::endl;
 }
 
 void test_complex_formulas() {
@@ -156,7 +156,7 @@ void test_complex_formulas() {
     std::cout << std::endl;
     
     assert(sets_equal(left_side, right_side));
-    std::cout << "✓ De Morgan's law verified" << std::endl;
+    std::cout << "\033[0;32m✓ De Morgan's law verified\033[0m" << std::endl;
     
     // Test distributivity: A & (B | C) = (A & B) | (A & C)
     auto left_dist = eval_set("ABC|&", sets);
@@ -171,7 +171,7 @@ void test_complex_formulas() {
     std::cout << std::endl;
     
     assert(sets_equal(left_dist, right_dist));
-    std::cout << "✓ Distributivity verified" << std::endl;
+    std::cout << "\033[0;32m✓ Distributivity verified\033[0m" << std::endl;
 }
 
 void test_edge_cases() {
@@ -187,7 +187,7 @@ void test_edge_cases() {
     
     std::vector<int> expected = {1, 2};
     assert(sets_equal(result, expected));
-    std::cout << "✓ Empty set union test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Empty set union test passed\033[0m" << std::endl;
     
     result = eval_set("AB&", empty_sets);
     std::cout << "Empty ∩ {1, 2} = ";
@@ -196,7 +196,7 @@ void test_edge_cases() {
     
     std::vector<int> expected_empty = {};
     assert(sets_equal(result, expected_empty));
-    std::cout << "✓ Empty set intersection test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Empty set intersection test passed\033[0m" << std::endl;
     
     // Test single element operations
     std::vector<std::vector<int>> single_sets = {{1}};
@@ -208,7 +208,7 @@ void test_edge_cases() {
     
     std::vector<int> expected_single = {1};
     assert(sets_equal(result, expected_single));
-    std::cout << "✓ Single set test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Single set test passed\033[0m" << std::endl;
 }
 
 void demonstrate_set_algebra() {
@@ -245,9 +245,6 @@ void demonstrate_set_algebra() {
 }
 
 int main() {
-    std::cout << "Exercise 09: Set-based Boolean Formula Evaluation" << std::endl;
-    std::cout << "=================================================" << std::endl;
-    
     try {
         test_basic_operations();
         test_complement_operations();
@@ -256,7 +253,7 @@ int main() {
         test_edge_cases();
         demonstrate_set_algebra();
         
-        std::cout << "\nAll tests passed! Set evaluation implementation is correct." << std::endl;
+        std::cout << "\n\033[0;32mAll tests passed! Set evaluation implementation is correct.\033[0m" << std::endl;
         
     } catch (const std::exception &e) {
         std::cerr << "❌ Test failed: " << e.what() << std::endl;

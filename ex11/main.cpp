@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/29 09:11:40 by hmunoz-g          #+#    #+#             */
+/*   Updated: 2025/08/29 09:11:41 by hmunoz-g         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -9,7 +21,6 @@
 void test_round_trip() {
     std::cout << "\033[0;33mRound Trip Tests----------------------\033[0m" << std::endl;
     
-    // Test that map and reverse_map are inverses
     std::vector<std::pair<uint16_t, uint16_t>> test_points = {
         {0, 0},
         {65535, 65535},
@@ -22,26 +33,23 @@ void test_round_trip() {
     };
     
     for (const auto &original : test_points) {
-        // Forward mapping
         double mapped_value = map(original.first, original.second);
         
-        // Reverse mapping
         auto recovered = reverse_map(mapped_value);
         
         std::cout << "(" << original.first << ", " << original.second << ") → " 
                   << std::fixed << std::setprecision(10) << mapped_value
                   << " → (" << recovered.first << ", " << recovered.second << ")";
         
-        // Check if we recovered the original point
         if (original.first == recovered.first && original.second == recovered.second) {
-            std::cout << " ✓" << std::endl;
+            std::cout << " \033[0;32m✓\033[0m" << std::endl;
         } else {
-            std::cout << " ❌" << std::endl;
+            std::cout << " NOT RECOVERED" << std::endl;
             assert(false);
         }
     }
     
-    std::cout << "✓ All round trip tests passed" << std::endl;
+    std::cout << "\033[0;32m✓ All round trip tests passed\033[0m" << std::endl;
 }
 
 void test_range_validation() {
@@ -66,18 +74,16 @@ void test_range_validation() {
         std::cout << std::fixed << std::setprecision(6) << value 
                   << " → (" << result.first << ", " << result.second << ")" << std::endl;
         
-        // Verify coordinates are in valid range
         assert(result.first <= 65535);
         assert(result.second <= 65535);
     }
     
-    std::cout << "✓ All range validation tests passed" << std::endl;
+    std::cout << "\033[0;32m✓ All range validation tests passed\033[0m" << std::endl;
 }
 
 void test_corner_values() {
     std::cout << "\n\033[0;33mCorner Values Tests----------------------\033[0m" << std::endl;
     
-    // Test the corner values that we know from the forward mapping
     struct CornerTest {
         double input;
         uint16_t expected_x, expected_y;
@@ -87,8 +93,6 @@ void test_corner_values() {
     std::vector<CornerTest> corners = {
         {0.0, 0, 0, "Bottom-left"},
         {1.0, 65535, 65535, "Top-right"}
-        // Note: We can't easily predict the exact intermediate corner values
-        // due to floating point precision, so we'll test the extremes
     };
     
     for (const auto &corner : corners) {
@@ -98,13 +102,13 @@ void test_corner_values() {
                   << " → (" << result.first << ", " << result.second << ")";
         
         if (result.first == corner.expected_x && result.second == corner.expected_y) {
-            std::cout << " ✓" << std::endl;
+            std::cout << " \033[0;32m✓\033[0m" << std::endl;
         } else {
             std::cout << " (expected (" << corner.expected_x << ", " << corner.expected_y << "))" << std::endl;
         }
     }
     
-    std::cout << "✓ Corner values test completed" << std::endl;
+    std::cout << "\033[0;32m✓ Corner values test completedv" << std::endl;
 }
 
 void test_precision() {
@@ -126,16 +130,16 @@ void test_precision() {
                   << " → (" << result.first << ", " << result.second << ")"
                   << " → " << back_mapped;
         
-        // Check if the round trip preserves precision reasonably
+        // Check if the round trip preserves precision
         double error = std::abs(value - back_mapped);
         if (error < 1e-9) {
-            std::cout << " ✓" << std::endl;
+            std::cout << " \033[0;32m✓\033[0m" << std::endl;
         } else {
             std::cout << " (error: " << error << ")" << std::endl;
         }
     }
     
-    std::cout << "✓ Precision tests completed" << std::endl;
+    std::cout << "\033[0;32m✓ Precision tests completed\033[0m" << std::endl;
 }
 
 void test_systematic_coverage() {
@@ -165,7 +169,7 @@ void test_systematic_coverage() {
     std::cout << "Errors: " << errors << std::endl;
     
     assert(errors == 0);
-    std::cout << "✓ Systematic coverage test passed" << std::endl;
+    std::cout << "\033[0;32m✓ Systematic coverage test passed\033[0m" << std::endl;
 }
 
 void test_bit_pattern_recovery() {
@@ -197,30 +201,19 @@ void test_bit_pattern_recovery() {
                   << " → (" << recovered.first << ", " << recovered.second << ")";
         
         if (recovered.first == test.x && recovered.second == test.y) {
-            std::cout << " ✓" << std::endl;
+            std::cout << " \033[0;32m\033[0m" << std::endl;
         } else {
-            std::cout << " ❌" << std::endl;
+            std::cout << " NOT RECOVERED" << std::endl;
             assert(false);
         }
     }
     
-    std::cout << "✓ Bit pattern recovery tests passed" << std::endl;
+    std::cout << "\033[0;32m✓ Bit pattern recovery tests passed\033[0m" << std::endl;
 }
 
 void demonstrate_inverse_mapping() {
     std::cout << "\n\033[0;33mInverse Mapping Demonstration----------------------\033[0m" << std::endl;
     
-    std::cout << "The reverse_map function is the inverse of the map function." << std::endl;
-    std::cout << "It takes a value in [0, 1] and recovers the original (x, y) coordinates." << std::endl;
-    std::cout << std::endl;
-    
-    std::cout << "The algorithm reverses the bit interleaving process:" << std::endl;
-    std::cout << "1. Convert the [0, 1] value back to a 32-bit integer" << std::endl;
-    std::cout << "2. De-interleave the bits to separate x and y coordinates" << std::endl;
-    std::cout << "3. Return the reconstructed (x, y) pair" << std::endl;
-    std::cout << std::endl;
-    
-    // Demonstrate with a few examples
     std::vector<double> demo_values = {0.0, 0.25, 0.5, 0.75, 1.0};
     
     std::cout << "Examples:" << std::endl;
@@ -232,16 +225,9 @@ void demonstrate_inverse_mapping() {
                   << " → (" << coords.first << ", " << coords.second << ")"
                   << " → " << back_to_value << std::endl;
     }
-    
-    std::cout << std::endl;
-    std::cout << "This creates a bijective mapping between 2D discrete coordinates" << std::endl;
-    std::cout << "and the continuous interval [0, 1], enabling space-filling curves." << std::endl;
 }
 
 int main() {
-    std::cout << "Exercise 11: Reverse Space-Filling Curve Mapping (1D → 2D)" << std::endl;
-    std::cout << "============================================================" << std::endl;
-    
     try {
         test_round_trip();
         test_range_validation();
@@ -251,10 +237,10 @@ int main() {
         test_bit_pattern_recovery();
         demonstrate_inverse_mapping();
         
-        std::cout << "\nAll tests passed! Reverse mapping implementation is correct." << std::endl;
+        std::cout << "\n\033[0;32mAll tests passed! Reverse mapping implementation is correct\033[0m." << std::endl;
         
     } catch (const std::exception &e) {
-        std::cerr << "❌ Test failed: " << e.what() << std::endl;
+        std::cerr << "NOT RECOVERED Test failed: " << e.what() << std::endl;
         return 1;
     }
     

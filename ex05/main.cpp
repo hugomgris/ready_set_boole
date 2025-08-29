@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:30:50 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/28 17:02:01 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/29 08:54:23 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ void verify_nnf_property(const std::string& original, const std::string& nnf) {
         }
     }
     
-    std::cout << "✅ VALID NNF: " << original << " -> " << nnf << std::endl;
+    std::cout << "✓ VALID NNF: " << original << " -> " << nnf << std::endl;
 }
 
 void test_nnf_validity() {
@@ -161,9 +161,6 @@ void test_nnf_validity() {
 //ex04 main
 int main() {
     try {
-        std::cout << "\033[0;32m🚀 COMPREHENSIVE NNF TESTING SUITE 🚀\033[0m" << std::endl;
-        std::cout << "==========================================" << std::endl << std::endl;
-        
         test_single_variables();
         test_basic_transformations();
         test_double_negation();
@@ -172,7 +169,7 @@ int main() {
         test_edge_cases();
         test_nnf_validity();
         
-        std::cout << "\033[0;32m✅ ALL TESTS COMPLETED!\033[0m" << std::endl;
+        std::cout << "\033[0;32m✓ ALL TESTS COMPLETED!\033[0m" << std::endl;
         
     } catch (const std::exception &e) {
         std::cout << "\033[0;31mFATAL EXCEPTION: " << e.what() << "\033[0m" << std::endl;
