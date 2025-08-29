@@ -6,7 +6,7 @@
 /*   By: hmunoz-g <hmunoz-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 10:39:51 by hmunoz-g          #+#    #+#             */
-/*   Updated: 2025/08/28 12:59:58 by hmunoz-g         ###   ########.fr       */
+/*   Updated: 2025/08/29 08:47:54 by hmunoz-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,7 +205,7 @@ std::unique_ptr<NNFNode> convert_to_nnf(std::unique_ptr<NNFNode> ast) {
         return ast;
     }
     
-    // Should not reach here if eliminate_complex_operators worked correctly
+    // Should not reach here
     throw std::invalid_argument("Unexpected operator in NNF conversion");
 }
 
@@ -503,13 +503,11 @@ std::unique_ptr<NNFNode> distribute_or_over_and(std::unique_ptr<NNFNode> left, s
 std::unique_ptr<NNFNode> convert_to_cnf(std::unique_ptr<NNFNode> ast) {
     if (!ast) return ast;
     
-    // Base case: variables and negated variables are already in CNF
     if (ast->type == NNFNode::VARIABLE || 
         (ast->type == NNFNode::NOT && ast->right->type == NNFNode::VARIABLE)) {
         return ast;
     }
     
-    // Recursively convert children to CNF first
     if (ast->left) {
         ast->left = convert_to_cnf(std::move(ast->left));
     }
@@ -517,12 +515,11 @@ std::unique_ptr<NNFNode> convert_to_cnf(std::unique_ptr<NNFNode> ast) {
         ast->right = convert_to_cnf(std::move(ast->right));
     }
     
-    // Handle AND - already correct for CNF (conjunction at top level)
     if (ast->type == NNFNode::AND) {
         return ast;
     }
     
-    // Handle OR - need to distribute if children contain AND
+    // OR - need to distribute if children contain AND
     if (ast->type == NNFNode::OR) {
         return distribute_or_over_and(std::move(ast->left), std::move(ast->right));
     }
@@ -544,7 +541,6 @@ std::string conjunctive_normal_form(const std::string &rpn) {
 // ex07
 bool sat(const std::string &formula) {
     try {
-        // Extract all variables from the formula
         std::set<char> variables;
         for (char c : formula) {
             if (c >= 'A' && c <= 'Z') {
@@ -555,21 +551,17 @@ bool sat(const std::string &formula) {
         std::vector<char> vars(variables.begin(), variables.end());
         int n = vars.size();
         
-        // Try all possible combinations of truth values
         for (int i = 0; i < (1 << n); ++i) {
             std::string test_formula = formula;
             
-            // Substitute variables with truth values for this combination
             for (int j = 0; j < n; ++j) {
                 bool value = (i >> (n - 1 - j)) & 1;
                 char truth_value = value ? '1' : '0';
                 std::replace(test_formula.begin(), test_formula.end(), vars[j], truth_value);
             }
             
-            // Evaluate the formula with this assignment
             bool result = eval_formula(test_formula);
             
-            // If any combination evaluates to true, the formula is satisfiable
             if (result) {
                 return true;
             }
@@ -579,7 +571,6 @@ bool sat(const std::string &formula) {
         return false;
         
     } catch (const std::exception &e) {
-        // Invalid formula
         std::cerr << "Error in SAT evaluation: " << e.what() << std::endl;
         return false;
     }
@@ -590,11 +581,10 @@ std::vector<std::vector<int>> powerset(const std::vector<int> &set) {
     std::vector<std::vector<int>> result;
     int n = set.size();
     
-    // Generate all 2^n subsets using bit manipulation
+    // Generate all 2^n subsets
     for (int i = 0; i < (1 << n); ++i) {
         std::vector<int> subset;
         
-        // Check each bit position
         for (int j = 0; j < n; ++j) {
             // If bit j is set in i, include set[j] in the subset
             if (i & (1 << j)) {
@@ -629,7 +619,6 @@ std::vector<int> eval_set(const std::string &formula, const std::vector<std::vec
             stack.pop();
             
             // Complement: find all elements that are NOT in the set
-            // We need to determine the universe (all possible elements)
             std::set<int> universe;
             for (const auto &s : sets) {
                 for (int elem : s) {
@@ -715,7 +704,6 @@ std::vector<int> eval_set(const std::string &formula, const std::vector<std::vec
             auto right = stack.top(); stack.pop();
             auto left = stack.top(); stack.pop();
             
-            // Find universe for complement of left
             std::set<int> universe;
             for (const auto &s : sets) {
                 for (int elem : s) {
@@ -750,7 +738,6 @@ std::vector<int> eval_set(const std::string &formula, const std::vector<std::vec
             auto right = stack.top(); stack.pop();
             auto left = stack.top(); stack.pop();
             
-            // Find universe for complements
             std::set<int> universe;
             for (const auto &s : sets) {
                 for (int elem : s) {
@@ -798,22 +785,16 @@ std::vector<int> eval_set(const std::string &formula, const std::vector<std::vec
 
 // ex10
 double map(uint16_t x, uint16_t y) {
-    // Combine x and y into a single 32-bit value using bit interleaving (Z-order curve)
     uint32_t combined = 0;
     
-    // Interleave the bits of x and y
     for (int i = 0; i < 16; ++i) {
-        // Extract bit i from x and y
         uint32_t bit_x = (x >> i) & 1;
         uint32_t bit_y = (y >> i) & 1;
         
-        // Place bit_x at position 2*i and bit_y at position 2*i+1
         combined |= (bit_x << (2 * i));
         combined |= (bit_y << (2 * i + 1));
     }
-    
-    // Convert to a value in [0, 1]
-    // Since we use 32 bits, the maximum value is 2^32 - 1
+
     double result = static_cast<double>(combined) / static_cast<double>(0xFFFFFFFFUL);
     
     return result;
@@ -821,22 +802,17 @@ double map(uint16_t x, uint16_t y) {
 
 // ex11
 std::pair<uint16_t, uint16_t> reverse_map(double n) {
-    // Clamp n to [0, 1] range
     if (n < 0.0) n = 0.0;
     if (n > 1.0) n = 1.0;
     
-    // Convert back to 32-bit integer
     uint32_t combined = static_cast<uint32_t>(n * 0xFFFFFFFFUL);
     
-    // De-interleave the bits to get x and y coordinates
     uint16_t x = 0, y = 0;
     
     for (int i = 0; i < 16; ++i) {
-        // Extract bits at positions 2*i (for x) and 2*i+1 (for y)
         uint32_t bit_x = (combined >> (2 * i)) & 1;
         uint32_t bit_y = (combined >> (2 * i + 1)) & 1;
         
-        // Place the bits in the correct positions for x and y
         x |= (bit_x << i);
         y |= (bit_y << i);
     }
