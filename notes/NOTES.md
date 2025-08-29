@@ -6,7 +6,7 @@
 | **Operation** | **Mathematical Symbol** | **Programming Symbol** | **Logic Gate** | **Description** |
 |---------------|------------------------|----------------------|----------------|-----------------|
 | **AND** | `∧` | `&` | AND Gate | Both inputs must be true |
-| **OR** | `∨` | `|` | OR Gate | At least one input must be true |
+| **OR** | `∨` | `\|` | OR Gate | At least one input must be true |
 | **NOT** | `¬` | `!` | NOT Gate | Inverts the input |
 | **XOR** | `⊕` | `^` | XOR Gate | Exactly one input must be true |
 | **IMPLIES** | `⇒` | `>` | - | "If A then B" |
